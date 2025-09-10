@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import api from '../api'; // Import the custom api instance
 
 function LoginPage() {
     const [email, setEmail] = useState('');
@@ -11,10 +11,9 @@ function LoginPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const { data } = await axios.post('http://localhost:5000/api/auth/login', { email, password });
-            // Store the token in localStorage (use 'token' for consistency)
+            // Use the 'api' instance here
+            const { data } = await api.post('/auth/login', { email, password });
             localStorage.setItem('token', data.token);
-            // Redirect to the admin dashboard
             navigate('/admin');
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed!');
@@ -32,7 +31,7 @@ function LoginPage() {
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-2 border rounded-lg"
                         required
                     />
                 </div>
@@ -43,12 +42,12 @@ function LoginPage() {
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="w-full px-4 py-2 border rounded-lg"
                         required
                     />
                 </div>
                 {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-                <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-700">
+                <button type="submit" className="w-full bg-indigo-600 text-white font-bold py-3 px-4 rounded-lg">
                     Log In
                 </button>
             </form>
