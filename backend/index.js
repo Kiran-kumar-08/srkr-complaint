@@ -9,8 +9,8 @@ const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
-// --- Start: Updated CORS Configuration ---
-// List of all the frontend URLs that are allowed to access the backend
+// --- Start: Corrected CORS Configuration ---
+// This list includes all possible frontend URLs that are allowed to access your backend.
 const allowedOrigins = [
   'https://srkr-complaint.vercel.app',
   'https://srkr-complaint-git-main-kirans-projects-8f6d027e9.vercel.app',
@@ -19,8 +19,10 @@ const allowedOrigins = [
 
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests that don't have an origin (like mobile apps or direct API calls)
     if (!origin) return callback(null, true);
+    
+    // Check if the incoming origin is in our list of allowed sites
     if (allowedOrigins.indexOf(origin) === -1) {
       const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
       return callback(new Error(msg), false);
@@ -30,7 +32,7 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-// --- End: Updated CORS Configuration ---
+// --- End: Corrected CORS Configuration ---
 
 
 app.use(express.json());
