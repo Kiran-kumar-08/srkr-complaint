@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://srkrcomplaint.onrender.com/api',
+  baseURL: 'https://srkrcomplaint.onrender.com',
   headers: {
     'Content-Type': 'application/json',
   },
