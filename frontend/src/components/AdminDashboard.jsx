@@ -1,112 +1,119 @@
 import React, { useState, useEffect } from 'react';
-// 1. Import the custom 'api' instance instead of the default 'axios'
-import api from '../api'; // Adjust the path if api.js is in a different folder
+import api from '../api';
+import { FaStar } from 'react-icons/fa';
 
 function AdminDashboard() {
-    // State to store the list of complaints from the API
     const [complaints, setComplaints] = useState([]);
-    // State to handle loading feedback while fetching data
     const [loading, setLoading] = useState(true);
-    // State to store any errors that occur during fetching
     const [error, setError] = useState('');
 
-    // This function fetches all complaints from the backend when the component first loads
     useEffect(() => {
         const fetchComplaints = async () => {
             try {
-                // 2. Use the 'api' instance. It automatically includes the token and base URL.
                 const response = await api.get('/complaints');
-                // Store the fetched data in the state
                 setComplaints(response.data);
             } catch (err) {
-                // The interceptor in api.js will handle 401 errors automatically.
-                // This will catch other errors, like network issues.
-                setError('Failed to fetch complaints. Please try again.');
-                console.error(err);
+                setError('Failed to fetch complaints.');
             } finally {
-                // Set loading to false once the request is complete
                 setLoading(false);
             }
         };
-
         fetchComplaints();
-    }, []); // The empty dependency array [] ensures this effect runs only once
+    }, []);
 
-    // This function handles updating the status of a complaint
     const handleStatusChange = async (id, newStatus) => {
         try {
-            // 3. Use the 'api' instance for the PUT request as well. It's already configured.
             await api.put(`/complaints/${id}`, { status: newStatus });
-            
-            // Update the local state immediately to reflect the change in the UI
-            setComplaints(prevComplaints =>
-                prevComplaints.map(complaint =>
-                    complaint._id === id ? { ...complaint, status: newStatus } : complaint
-                )
-            );
+            setComplaints(prev => prev.map(c => c._id === id ? { ...c, status: newStatus } : c));
         } catch (err) {
-            console.error('Failed to update status', err);
-            alert('Failed to update status. Please try again.');
+            alert('Failed to update status.');
         }
     };
+    
+    // Component to render star ratings
+    const Rating = ({ count }) => (
+        <div className="flex items-center">
+            {[...Array(count)].map((_, i) => <FaStar key={i} color="#ffc107" />)}
+            <span className="ml-2 text-sm text-gray-600">({count}/5)</span>
+        </div>
+    );
 
-    // Show a loading message while data is being fetched
-    if (loading) {
-        return <p className="text-center text-gray-500 mt-10">Loading complaints...</p>;
-    }
+    const StatusSelector = ({ complaint }) => (
+        <select value={complaint.status} onChange={(e) => handleStatusChange(complaint._id, e.target.value)} className="p-2 border rounded-md w-full">
+            <option>Submitted</option>
+            <option>In Progress</option>
+            <option>Resolved</option>
+            <option>Rejected</option>
+        </select>
+    );
 
-    // Show an error message if the fetch failed
-    if (error) {
-        return <p className="text-center text-red-500 mt-10">{error}</p>;
-    }
+    const EvidenceLinks = ({ filePaths }) => {
+        if (!filePaths || filePaths.length === 0) return <span className="text-gray-400">N/A</span>;
+        return (
+            <div className="flex flex-col items-start">
+                {filePaths.map((path, i) => <a key={i} href={`http://localhost:5000/${path}`} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">File {i + 1}</a>)}
+            </div>
+        );
+    };
+
+    if (loading) return <p className="text-center">Loading...</p>;
+    if (error) return <p className="text-center text-red-500">{error}</p>;
 
     return (
-        <div className="max-w-7xl mx-auto bg-white p-6 md:p-8 rounded-lg shadow-md">
-            <h2 className="text-3xl font-bold mb-6 text-gray-800">Admin Dashboard</h2>
-            <div className="overflow-x-auto">
-                <table className="min-w-full bg-white">
+        <div className="max-w-7xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6 px-4 md:px-0">Admin Dashboard</h2>
+
+            {/* --- Mobile View --- */}
+            <div className="md:hidden px-4 space-y-4">
+                {complaints.map((c) => (
+                    <div key={c._id} className="bg-white p-4 rounded-lg shadow">
+                        <h3 className="font-bold">{c.title}</h3>
+                        <p className="text-sm text-gray-500">{c.category}</p>
+                        <div className="mt-2 space-y-2 text-sm">
+                            <div className="flex justify-between"><span>Date:</span> <span>{new Date(c.createdAt).toLocaleDateString()}</span></div>
+                            <div className="flex justify-between"><span>Evidence:</span> <EvidenceLinks filePaths={c.filePaths} /></div>
+                             {c.feedback && (
+                                <div className="pt-2 border-t">
+                                    <div className="flex justify-between"><span>Rating:</span> <Rating count={c.rating} /></div>
+                                    <p className="text-gray-600 mt-1"><em>"{c.feedback}"</em></p>
+                                </div>
+                            )}
+                            <div className="pt-2 border-t"><StatusSelector complaint={c} /></div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* --- Desktop View --- */}
+            <div className="hidden md:block bg-white p-6 rounded-lg shadow-md">
+                <table className="min-w-full">
                     <thead className="bg-gray-100">
                         <tr>
-                            <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 uppercase">Title</th>
-                            {/* I added a placeholder for Category as it was in your table but not in the previous code */}
-                            <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 uppercase">Category</th>
-                            <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 uppercase">Date</th>
-                            <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 uppercase">Evidence</th>
-                            <th className="py-3 px-4 text-left text-sm font-semibold text-gray-600 uppercase">Status</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold">Title</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold">Feedback</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold">Date</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold">Evidence</th>
+                            <th className="py-3 px-4 text-left text-sm font-semibold">Status</th>
                         </tr>
                     </thead>
                     <tbody className="text-gray-700">
-                        {complaints.map((complaint) => (
-                            <tr key={complaint._id} className="border-b border-gray-200 hover:bg-gray-50">
-                                <td className="py-3 px-4 font-medium">{complaint.title}</td>
-                                <td className="py-3 px-4">{complaint.category || 'General'}</td>
-                                <td className="py-3 px-4 text-sm">{new Date(complaint.createdAt).toLocaleDateString()}</td>
+                        {complaints.map((c) => (
+                            <tr key={c._id} className="border-b">
                                 <td className="py-3 px-4">
-                                    {complaint.filePath ? (
-                                        <a
-                                            href={`http://localhost:5000/${complaint.filePath}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-indigo-600 hover:text-indigo-800 hover:underline"
-                                        >
-                                            View File
-                                        </a>
-                                    ) : (
-                                        <span className="text-gray-400">N/A</span>
-                                    )}
+                                    <p className="font-medium">{c.title}</p>
+                                    <p className="text-sm text-gray-500">{c.category}</p>
                                 </td>
                                 <td className="py-3 px-4">
-                                    <select
-                                        value={complaint.status}
-                                        onChange={(e) => handleStatusChange(complaint._id, e.target.value)}
-                                        className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-                                    >
-                                        <option value="Submitted">Submitted</option>
-                                        <option value="In Progress">In Progress</option>
-                                        <option value="Resolved">Resolved</option>
-                                        <option value="Rejected">Rejected</option>
-                                    </select>
+                                    {c.feedback ? (
+                                        <div>
+                                            <Rating count={c.rating} />
+                                            <p className="text-sm text-gray-600 mt-1">"{c.feedback}"</p>
+                                        </div>
+                                    ) : <span className="text-gray-400">N/A</span>}
                                 </td>
+                                <td className="py-3 px-4">{new Date(c.createdAt).toLocaleDateString()}</td>
+                                <td className="py-3 px-4"><EvidenceLinks filePaths={c.filePaths} /></td>
+                                <td className="py-3 px-4"><StatusSelector complaint={c} /></td>
                             </tr>
                         ))}
                     </tbody>

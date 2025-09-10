@@ -17,15 +17,21 @@ const complaintSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['Pending', 'In Progress', 'Resolved'],
-    default: 'Pending'
+    enum: ['Submitted', 'In Progress', 'Resolved', 'Rejected'],
+    default: 'Submitted'
   },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+  filePaths: {
+    type: [String]
   },
-  filePath: {
-    type: String
+  // --- New fields for feedback ---
+  feedback: {
+    type: String,
+    trim: true
+  },
+  rating: {
+    type: Number,
+    min: 1,
+    max: 5
   }
 }, {
   timestamps: true

@@ -16,14 +16,14 @@ function Footer() {
 
           <div className="flex space-x-6">
             <a 
-              href="mailto:info@svecw.edu.in" 
+              href="principal@srkrec.ac.in" 
               className="text-slate-400 hover:text-white transition duration-300"
               aria-label="Email"
             >
               <FaEnvelope size={24} />
             </a>
             <a 
-              href="https://www.instagram.com/svecw_bvr/" 
+              href="https://www.instagram.com/srkr_engineering_college/#" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-slate-400 hover:text-white transition duration-300"
@@ -32,7 +32,7 @@ function Footer() {
               <FaInstagram size={24} />
             </a>
             <a 
-              href="https://www.linkedin.com/school/svecw/" 
+              href="https://www.linkedin.com/school/srkr-engineering-college/" 
               target="_blank" 
               rel="noopener noreferrer" 
               className="text-slate-400 hover:text-white transition duration-300"

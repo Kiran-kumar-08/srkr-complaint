@@ -6,51 +6,34 @@ const {
     createComplaint, 
     getAllComplaints, 
     getComplaintById, 
-    updateComplaintStatus 
+    updateComplaintStatus,
+    submitFeedback // Import the new function
 } = require('../controllers/complaintController');
-const { protect } = require('../middleware/authMiddleware'); // Import security middleware
+const { protect } = require('../middleware/authMiddleware');
 
-// --- Multer Configuration for file uploads ---
 const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/'); // Destination folder for uploaded files
-    },
-    filename: function (req, file, cb) {
-        // Create a unique filename to prevent overwriting files with the same name
-        cb(null, Date.now() + path.extname(file.originalname)); 
-    }
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
 });
 
 const fileFilter = (req, file, cb) => {
-    // Allow images and PDFs only for security
     if (file.mimetype.startsWith('image/') || file.mimetype === 'application/pdf') {
         cb(null, true);
     } else {
-        cb(new Error('Invalid file type. Only images and PDFs are allowed.'), false);
+        cb(new Error('Invalid file type.'), false);
     }
 };
 
-const upload = multer({ storage: storage, fileFilter: fileFilter });
-// --- End Multer Configuration ---
+const upload = multer({ storage, fileFilter });
 
-
-// --- Route Definitions ---
-
-// PUBLIC ROUTE: Anyone can submit a new complaint with an optional file.
-// POST /api/complaints
-router.post('/', upload.single('evidenceFile'), createComplaint);
-
-// PROTECTED ROUTE: Only a logged-in admin can get a list of all complaints.
-// GET /api/complaints
+// Existing routes
+router.post('/', upload.array('evidenceFiles', 5), createComplaint);
 router.get('/', protect, getAllComplaints);
-
-// PUBLIC ROUTE: Anyone with a valid ID can track the status of their complaint.
-// GET /api/complaints/:id
 router.get('/:id', getComplaintById);
-
-// PROTECTED ROUTE: Only a logged-in admin can update the status of a complaint.
-// PUT /api/complaints/:id
 router.put('/:id', protect, updateComplaintStatus);
 
+// --- New route for submitting feedback ---
+// This route uses the original MongoDB _id
+router.post('/:id/feedback', submitFeedback);
 
 module.exports = router;
