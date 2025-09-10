@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-// Use the environment variable for the base URL
+// This line tells your app to use the live backend URL when deployed,
+// and the local URL when you're developing.
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
@@ -10,7 +11,7 @@ const api = axios.create({
   },
 });
 
-// Always attach the latest token from localStorage to every request
+// The rest of the file remains the same...
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
