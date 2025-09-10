@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import api from '../api'; // Import the custom api instance
+import api from '../api'; // Use the central api instance
 
 function LoginPage() {
     const [email, setEmail] = useState('');
@@ -11,7 +11,7 @@ function LoginPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Use the 'api' instance here
+            // CORRECTED: Use 'api' instead of 'axios' with a hardcoded URL
             const { data } = await api.post('/auth/login', { email, password });
             localStorage.setItem('token', data.token);
             navigate('/admin');
@@ -24,6 +24,7 @@ function LoginPage() {
         <div className="max-w-md mx-auto mt-20 bg-white p-8 rounded-xl shadow-lg">
             <h2 className="text-3xl font-bold mb-8 text-center text-gray-800">Admin Login</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Form fields remain the same */}
                 <div>
                     <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
                     <input
