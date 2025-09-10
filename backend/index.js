@@ -9,14 +9,29 @@ const authRoutes = require('./routes/authRoutes');
 
 const app = express();
 
-// --- Update CORS Configuration Here ---
+// --- Start: Updated CORS Configuration ---
+// List of all the frontend URLs that are allowed to access the backend
+const allowedOrigins = [
+  'https://srkr-complaint.vercel.app',
+  'https://srkr-complaint-git-main-kirans-projects-8f6d027e9.vercel.app',
+  'https://srkr-complaint-2jeyte0o5-kirans-projects-8f6d027e9.vercel.app'
+];
+
 app.use(cors({
-    // Allow requests ONLY from your deployed Vercel frontend
-    origin: 'https://srkr-complaint-git-main-kirans-projects-8f6d027e9.vercel.app', 
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
-// ------------------------------------
+// --- End: Updated CORS Configuration ---
+
 
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
