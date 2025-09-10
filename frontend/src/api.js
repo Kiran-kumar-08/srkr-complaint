@@ -1,7 +1,10 @@
 import axios from 'axios';
 
+// Use the environment variable for the base URL
+const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+
 const api = axios.create({
-  baseURL: 'https://srkrcomplaint.onrender.com',
+  baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
   },
